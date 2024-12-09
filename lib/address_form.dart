@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:js' as js;
-
+import 'dart:html' as html;
 
 class AddressForm extends StatefulWidget {
   const AddressForm({Key? key}) : super(key: key);
@@ -15,63 +15,106 @@ class _AddressFormState extends State<AddressForm> {
   final TextEditingController _line2Controller = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _postcodeController = TextEditingController();
+  bool _isScriptLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeAddressNow();
+    _loadScript();
+  }
+
+  void _loadScript() {
+    // Create the input element for AddressNow
+    final addressInput = html.InputElement()
+      ..id = 'address'
+      ..style.width = '100%'
+      ..style.padding = '8px'
+      ..style.border = '1px solid #ccc'
+      ..style.borderRadius = '4px';
+
+    // Insert the input element into the DOM
+    html.document.body?.children.add(addressInput);
+
+    // Check if script is already loaded
+    if (html.document.querySelector('script[src*="addressnow"]') != null) {
+      _isScriptLoaded = true;
+      _initializeAddressNow();
+      return;
+    }
+
+    final script = html.ScriptElement()
+      ..type = 'text/javascript'
+      ..src = 'http://api.addressnow.co.uk/js/addressnow-2.20.min.js?key=tx12-yy85-mb16-yu94';
+
+    script.onLoad.listen((_) {
+      setState(() {
+        _isScriptLoaded = true;
+        _initializeAddressNow();
+      });
+    });
+
+    html.document.head!.append(script);
   }
 
   void _initializeAddressNow() {
-    js.context.callMethod('eval', ['''
-      window.pca = window.pca || {};
-      window.pca.on = window.pca.on || function(){};
+    if (!_isScriptLoaded) return;
+
+    js.context['updateFlutterControllers'] = (dynamic address) {
+      if (!mounted) return;
       
-      // Initialize AddressNow
-      var fields = [{
-        element: "address",
-        field: "",
-        mode: pca.fieldMode.SEARCH
-      }];
+      setState(() {
+        _line1Controller.text = address['line1'] ?? '';
+        _line2Controller.text = address['line2'] ?? '';
+        _cityController.text = address['city'] ?? '';
+        _postcodeController.text = address['postcode'] ?? '';
+      });
+    };
 
-      var options = {
-        key: "tx12-yy85-mb16-yu94",
-        search: {
-          countries: "GBR"
-        },
-        setCountryByIP: false
-      };
+    js.context.callMethod('eval', ['''
+      if (typeof pca !== 'undefined') {
+        var fields = [{
+          element: "address",
+          field: "",
+          mode: pca.fieldMode.SEARCH
+        }];
 
-      var control = new pca.Address(fields, options);
+        var options = {
+          key: "tx12-yy85-mb16-yu94",
+          search: {
+            countries: "GBR"
+          },
+          setCountryByIP: false,
+          suppressAutocomplete: false,
+          bar: {
+            visible: true,
+            showCountry: false
+          }
+        };
 
-      control.listen("populate", function(address) {
-        var parts = address.Label.split(',').map(function(part) {
-          return part.trim();
-        });
-        
-        var line1 = parts[0] || '';
-        var line2 = parts.length > 2 ? parts.slice(1, -2).join(', ') : '';
-        var city = parts.length > 1 ? parts[parts.length - 2] : '';
-        var postcode = parts[parts.length - 1] || '';
+        try {
+          var control = new pca.Address(fields, options);
 
-        document.getElementById('line1').value = line1;
-        document.getElementById('line2').value = line2;
-        document.getElementById('city').value = city;
-        document.getElementById('postcode').value = postcode;
+          control.listen("populate", function(address) {
+            var parts = address.Label.split(',').map(function(part) {
+              return part.trim();
+            });
+            
+            var line1 = parts[0] || '';
+            var line2 = parts.length > 2 ? parts.slice(1, -2).join(', ') : '';
+            var city = parts.length > 1 ? parts[parts.length - 2] : '';
+            var postcode = parts[parts.length - 1] || '';
 
-        // Update Flutter controllers
-        if (window.flutterWebViewController) {
-          window.flutterWebViewController.postMessage(JSON.stringify({
-            type: 'updateFields',
-            data: {
+            updateFlutterControllers({
               line1: line1,
-              line2: line2, 
+              line2: line2,
               city: city,
               postcode: postcode
-            }
-          }));
+            });
+          });
+        } catch (e) {
+          console.error('AddressNow initialization error:', e);
         }
-      });
+      }
     ''']);
   }
 
@@ -82,14 +125,12 @@ class _AddressFormState extends State<AddressForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Search Address',
-              hintText: 'Enter postcode or address',
-              border: OutlineInputBorder(),
+          SizedBox(
+            height: 48,
+            child: HtmlElementView(
+              viewType: 'address',
             ),
-          ).id('address'),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _line1Controller,
@@ -98,7 +139,7 @@ class _AddressFormState extends State<AddressForm> {
               border: OutlineInputBorder(),
             ),
             readOnly: true,
-          ).id('line1'),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _line2Controller,
@@ -107,7 +148,7 @@ class _AddressFormState extends State<AddressForm> {
               border: OutlineInputBorder(),
             ),
             readOnly: true,
-          ).id('line2'),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _cityController,
@@ -116,7 +157,7 @@ class _AddressFormState extends State<AddressForm> {
               border: OutlineInputBorder(),
             ),
             readOnly: true,
-          ).id('city'),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _postcodeController,
@@ -125,7 +166,7 @@ class _AddressFormState extends State<AddressForm> {
               border: OutlineInputBorder(),
             ),
             readOnly: true,
-          ).id('postcode'),
+          ),
         ],
       ),
     );
@@ -139,17 +180,5 @@ class _AddressFormState extends State<AddressForm> {
     _cityController.dispose();
     _postcodeController.dispose();
     super.dispose();
-  }
-}
-
-extension on TextField {
-  TextField id(String id) {
-    return TextField(
-      controller: controller,
-      decoration: decoration,
-      readOnly: readOnly,
-      key: ValueKey(id),
-      buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-    );
   }
 } 
