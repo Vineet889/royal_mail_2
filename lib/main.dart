@@ -1,26 +1,31 @@
+import 'package:demo_rm/webview_example.dart';
 import 'package:flutter/material.dart';
-import 'address_form.dart';
+import 'dart:html' as html;
+import 'dart:ui' as ui;
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
-  runApp(const MyApp());
+  // html.window.customElements?.define('webview-html',html.IFrameElement()..src ='assets/webview.html'..style.border = 'none');
+  ui.platformViewRegistry.registerViewFactory(
+      'webview-html',
+          (int viewId) => html.IFrameElement()
+        ..width = '640'
+        ..height = '360'
+        ..src = 'assets/webview.html'
+        ..style.border = 'none');
+  runApp(MaterialApp(home: WebviewExample()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Address Lookup',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const Scaffold(
-        body: SingleChildScrollView(
-          child: AddressForm(),
-        ),
-      ),
-    );
+    return MaterialApp();
   }
 }
+
+
+
 

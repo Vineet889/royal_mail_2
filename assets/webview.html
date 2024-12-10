@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="http://api.addressnow.co.uk/css/addressnow-2.20.min.css?key=tx12-yy85-mb16-yu94" />
+    <script type="text/javascript" src="http://api.addressnow.co.uk/js/addressnow-2.20.min.js?key=tx12-yy85-mb16-yu94"></script>
+
+    <script type="text/javascript">
+        addressNow.listen('load', function(control) {
+            control.listen("populate", function (address) {
+                document.getElementById("txtLine1").value = address.Line1;
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        addressNow.listen('load', function(control) {
+            control.listen("populate", function (address) {
+                document.getElementById("txtLine2").value = address.Line2;
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        addressNow.listen('load', function(control) {
+            control.listen("populate", function (address) {
+                document.getElementById("txtTown").value = address.Town;
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        addressNow.listen('load', function(control) {
+            control.listen("populate", function (address) {
+                document.getElementById("txtPostcode").value = address.Postcode;
+            });
+        });
+    </script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WebView</title>
+        <script>
+            function sendMessage() {
+              const inputField = document.getElementById("address");
+              const message = inputField.value;
+              if (message) {
+                // Send message to Flutter
+                window.parent.postMessage({ message: message }, "*");
+                inputField.value = ""; // Clear the input
+              }
+            }
+    </script>
+</head>
+<body>
+<h1>Type a Message</h1>
+<form
+        onsubmit="sendMessage(); return false;"
+        style="display: flex; flex-direction: column; max-width: 300px; margin: auto;"
+>
+<!--    <input-->
+<!--            style="color: #929296; font-size: 16px; letter-spacing: 0.5px; font-weight: 400; padding: 10px 16px;"-->
+<!--            id="address"-->
+<!--            type="text"-->
+<!--            placeholder=""-->
+<!--            maxlength="100"-->
+<!--            onblur="sendMessage(); return false;"-->
+<!--    />-->
+    <input
+            style="color: #929296; font-size: 16px; letter-spacing: 0.5px; font-weight: 400; padding: 10px 16px;"
+            id="address"
+            type="text"
+            placeholder="Type your message here"
+            style="color: #929296; padding: 10px 16px;; letter-spacing: 0.5px; font-size: 16px; font-weight: 400; margin-bottom: 10px;"
+            maxlength="100"
+    />
+    <button type="submit" style="padding: 10px; font-size: 16px;">Send</button>
+    <label for="txtLine1">Line 1</label>
+    <input type="text" name="txtLine1" id="txtLine1"></input>
+    <label for="txtLine2">Line 2</label>
+    <input type="text" name="txtLine2" id="txtLine2"></input>
+    <label for="txtTown">Town</label>
+    <input type="text" name="txtTown" id="txtTown"></input>
+    <label for="txtPostcode">Postcode</label>
+    <input type="text" name="txtPostcode" id="txtPostcode"></input>
+
+    </form>
+    </body>
+    </html>
