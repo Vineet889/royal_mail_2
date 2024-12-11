@@ -13,6 +13,7 @@ class OpenNewAccountBlocState extends BaseState {
     this.countryResidenceList = const <String>[],
     this.countryList = const <String>[],
     this.accountType,
+    this.showUKAddressSearch = false,
   });
 
   final int currentStep;
@@ -26,6 +27,7 @@ class OpenNewAccountBlocState extends BaseState {
   final List<String> countryResidenceList;
   final List<String> countryList;
   final int? accountType;
+  final bool showUKAddressSearch;
 
   OpenNewAccountBlocState copyWith({
     int? currentStep,
@@ -38,7 +40,8 @@ class OpenNewAccountBlocState extends BaseState {
     List<String>? genderList,
     List<String>? countryResidenceList,
     List<String>? countryList,
-    int? accountType
+    int? accountType,
+    bool? showUKAddressSearch,
   }) {
     return OpenNewAccountBlocState(
       currentStep: currentStep ?? this.currentStep,
@@ -51,7 +54,8 @@ class OpenNewAccountBlocState extends BaseState {
       isTimerRunning: isTimerRunning ?? this.isTimerRunning,
       genderList: genderList ?? this.genderList,
       countryResidenceList: countryResidenceList ?? this.countryResidenceList,
-      accountType: accountType ?? this.accountType
+      accountType: accountType ?? this.accountType,
+      showUKAddressSearch: showUKAddressSearch ?? this.showUKAddressSearch,
     );
   }
 }

@@ -38,6 +38,7 @@ import 'package:icici_international_onboarding/src/di/di.dart';
 import 'package:icici_international_onboarding/src/utils/enums.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
+import 'dart:html' as html;
 
 part 'open_new_account_bloc_state.dart';
 
@@ -88,6 +89,32 @@ class OpenNewAccountBloc
     // });
     _initMasterData();
     on<DataInitialize>(_onClearData);
+
+    on<ToggleUKAddressSearchEvent>((event, emit) {
+      emit(state.copyWith(showUKAddressSearch: !state.showUKAddressSearch));
+    });
+
+    on<UpdateUKAddressEvent>((event, emit) {
+      flatNameNumberController.text = event.address.flatNumber;
+      houseNameController.text = event.address.buildingName;
+      streetNameController.text = event.address.streetName;
+      cityController.text = event.address.city;
+      districtController.text = event.address.district;
+      postalCodeController.text = event.address.postcode;
+      
+      emit(state.copyWith(
+        showUKAddressSearch: false,
+        isValid: true,
+      ));
+    });
+
+    // Initialize HTML message listener
+    html.window.onMessage.listen((event) {
+      if (event.data is Map && event.data['address'] != null) {
+        final address = UKAddress.fromJson(event.data['address']);
+        add(UpdateUKAddressEvent(address: address));
+      }
+    });
   }
 
   final _genderUC = getIt<GenderUC>();

@@ -56,3 +56,10 @@ class ChangeAccountTypeEvent extends OpenNewAccountEvent {
 //
 //   final List<String> value;
 // }
+
+class ToggleUKAddressSearchEvent extends OpenNewAccountEvent {}
+
+class UpdateUKAddressEvent extends OpenNewAccountEvent {
+  final UKAddress address;
+  UpdateUKAddressEvent({required this.address});
+}

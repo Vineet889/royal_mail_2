@@ -169,25 +169,26 @@ class AddressDetailsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          ..._buildCommonIndUkView(context),
-          Flexible( // Or SizedBox with a defined height
-            child: ConstrainedBox( // Optional: To limit maximum height
-              constraints: BoxConstraints(maxHeight: 150), // Example maxHeight
-              child: Expanded(
-                child: HtmlElementView(viewType: 'webview-html'),
+          if (state.showUKAddressSearch) ...[
+            Container(
+              height: 200, // Adjust height as needed
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.grey70),
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: const HtmlElementView(viewType: 'webview-html'),
             ),
-          ),
-          // CustomTextField(
-          //   controller: bloc.postalCodeController,
-          //   labelText: context.ln.postalCode,
-          //   textCapitalization: TextCapitalization.words,
-          //   inputFormatters: [
-          //     FilteringTextInputFormatter.allow(RegExp('[0-9a-zA-Z ]')),
-          //   ],
-          //   onChanged: (_) => bloc.validateAddressDetails(),
-          // ),
-          const SizedBox(height: 24),
+          ] else ...[
+            CustomTextField(
+              controller: bloc.postalCodeController,
+              labelText: context.ln.postalCode,
+              onTap: () {
+                bloc.add(ToggleUKAddressSearchEvent());
+              },
+              readOnly: true,
+            ),
+          ],
+          ..._buildCommonIndUkView(context),
           const Spacer(),
           CustomElevatedButton(
             buttonText: context.ln.continue_t,
@@ -196,14 +197,9 @@ class AddressDetailsPage extends StatelessWidget {
             fontWeight: FontWeight.w600,
             letterSpacing: .25,
             textColor: AppColors.white,
-            onPressed:(){
-              context.goNamed(AppRoute.financialScreen.path);
-            },
-            // state.isValid
-            //     ? () => context.goNamed(
-            //           AppRoute.financialScreen.path,
-            //         )
-            //     : null,
+            onPressed: state.isValid
+                ? () => context.goNamed(AppRoute.financialScreen.path)
+                : null,
           ),
           const SizedBox(height: 16),
         ],
